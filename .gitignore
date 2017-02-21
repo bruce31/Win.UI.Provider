@@ -3,8 +3,13 @@
 obj/
 # nothing in binary folders
 bin/
+# nothing in vs folders
+.vs/
 # no user preference files
 *.userprefs
+*.csproj.user
+# no 'commented' program files
+*.csx
 # nothing from test-results folders
 test-results/
 # no zip files stored in original folders

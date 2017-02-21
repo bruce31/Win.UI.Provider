@@ -5,10 +5,8 @@
     using System.Collections.Generic;
     using System.Linq;
     using System.Windows.Forms;
-   // using Gtk;
-   // using Extensions;
-   // using Widgets;
-   using DevCore.Compare;
+    
+    using DevCore.Compare;
 
     public class DisplayDifferenceDialog : BaseInputDialog {
         public static void DisplayDifferences(IList<DiffDisplayLine> diffs, string leftTitle, string rightTitle) {
@@ -57,13 +55,7 @@
         }
 
         public int GetCurrentRow() {
-            //TreeIter iter;
-            //mTreeView.Selection.GetSelected(out iter);
-            //var path = mTreeView.Model.GetPath(iter);
-            //if (path == null) {
-            //    return mCurrChange;
-            //}
-            return 0;// path.Indices[0];
+            return  mGrid.CurrentCell.RowIndex;
         }
 
         /// <summary>
@@ -71,10 +63,14 @@
         /// </summary>
         /// <param name="row">Row. zero-based</param>
         public void SetCurrentRow(int row) {
-            //var path = new TreePath(new[] { row });
-            //mTreeView.ScrollToCell(path, mCurrNoCol, true, 0.5f, 0.5f);
-            //mTreeView.Selection.UnselectAll();
-            mCurrChange = row;
+            mCurrChange = Array.IndexOf(mChangeAreaStartLines, row);
+            mGrid.CurrentCell = mGrid.Rows[row].Cells[0];
+            mGrid.CurrentCell.Selected = false;
+        }
+
+        protected void OnLoad(object sender, EventArgs args) {
+            mGrid.CurrentCell.Selected = false;
+            mGrid.Paint -= OnLoad;
         }
 
         protected void OnPrev(object sender, EventArgs args) {
@@ -96,14 +92,16 @@
         }
 
         private void SetPrevNextEnabled() {
-            mPrevButton.Enabled = (mCurrChange != mFirstChange);
-            mNextButton.Enabled = (mCurrChange != mLastChange);
+            mPrevButton.Enabled = (mCurrChange > 0);
+            mNextButton.Enabled = (mCurrChange < mChangeAreaStartLines.Length -1);
         }
 
         private Button mPrevButton;
         private Button mNextButton;
         private Button mStackedButton;
         private Button mSideBySideButton;
+
+        private DataGridView mGrid;
 
         public DifferenceView(IList<DiffDisplayLine> diffs, string left, string right) : base() {
             var hBox = new Panel() { Dock= DockStyle.Top, Height = 30 };
@@ -129,43 +127,44 @@
             hBox.Controls.Add(mNextButton);
 
             
-            var grid = new DataGridView() { Dock = DockStyle.Fill};
+            mGrid = new DataGridView() { Dock = DockStyle.Fill};
 
-            grid.ReadOnly = true;
+            mGrid.ReadOnly = true;
 
-            grid.AutoGenerateColumns = false;
-            grid.ColumnCount = 4;
+            mGrid.AutoGenerateColumns = false;
+            mGrid.ColumnCount = 4;
 
-            grid.DataSource = diffs.Select(d=>new DiffDisplay(d)).ToArray();
-            grid.CellFormatting += Table_CellFormatting;
+            mGrid.DataSource = diffs.Select(d=>new DiffDisplay(d)).ToArray();
+            mGrid.CellFormatting += Table_CellFormatting;
             //grid.AutoSize = true;
 
             
-            grid.Columns[0].AutoSizeMode = DataGridViewAutoSizeColumnMode.None;
-            grid.Columns[0].Width = 40;
-            grid.Columns[0].DataPropertyName = "OrigNum";
+            mGrid.Columns[0].AutoSizeMode = DataGridViewAutoSizeColumnMode.None;
+            mGrid.Columns[0].Width = 40;
+            mGrid.Columns[0].DataPropertyName = "OrigNum";
 
-            grid.Columns[1].AutoSizeMode = DataGridViewAutoSizeColumnMode.Fill;
-            grid.Columns[1].DataPropertyName = "OrigLine";
-            grid.Columns[1].HeaderText = left;
+            mGrid.Columns[1].AutoSizeMode = DataGridViewAutoSizeColumnMode.Fill;
+            mGrid.Columns[1].DataPropertyName = "OrigLine";
+            mGrid.Columns[1].HeaderText = left;
 
-            grid.Columns[2].AutoSizeMode = DataGridViewAutoSizeColumnMode.None;
-            grid.Columns[2].Width = 40;
-            grid.Columns[2].DataPropertyName = "CurrNum";
+            mGrid.Columns[2].AutoSizeMode = DataGridViewAutoSizeColumnMode.None;
+            mGrid.Columns[2].Width = 40;
+            mGrid.Columns[2].DataPropertyName = "CurrNum";
 
-            grid.Columns[3].AutoSizeMode = DataGridViewAutoSizeColumnMode.Fill;
-            grid.Columns[3].DataPropertyName = "CurrLine";
-            grid.Columns[3].HeaderText = right;
-            //grid.Columns[2].Width = 100;
+            mGrid.Columns[3].AutoSizeMode = DataGridViewAutoSizeColumnMode.Fill;
+            mGrid.Columns[3].DataPropertyName = "CurrLine";
+            mGrid.Columns[3].HeaderText = right;
+
+            mGrid.Paint += OnLoad;
 
             mChangeAreaStartLines = IdentifyChangeAreas(diffs).ToArray();
             mFirstChange = mChangeAreaStartLines.First();
             mLastChange = mChangeAreaStartLines.Last();
 
             SetOrientationButtons(sideBySide: true);
+            SetPrevNextEnabled();
 
-            //this.Controls.Add(mid);
-            this.Controls.Add(grid);
+            this.Controls.Add(mGrid);
             this.Controls.Add(hBox);
             this.Dock = DockStyle.Fill;
         }
@@ -202,8 +201,7 @@
             mStackedButton.Enabled = sideBySide;
             mSideBySideButton.Enabled = !sideBySide;
         }
-
-        //private TreeView mTreeView;
+        
         private int[] mChangeAreaStartLines;
         private int mFirstChange;
         private int mLastChange;
@@ -222,63 +220,11 @@
             }
         }
 
-
         public static readonly Color[] BackgroundColor = {
              Color.FromArgb(255, 255, 255), // unchanged = white
 			 Color.FromArgb(255, 150, 150), // deleted = light red
 			 Color.FromArgb (100, 255, 100) // added = light green
 		};
-
-
-        //private void RenderCell(Gtk.TreeViewColumn column, Gtk.CellRenderer cell, Gtk.TreeModel model, Gtk.TreeIter iter) {
-        //    var render = (cell as Gtk.CellRendererText);
-
-        //    var line = (DiffDisplayLine)model.GetValue(iter, 0);
-
-        //    var txt = "";
-        //    var backColor = BackgroundColor[0];
-
-        //    if (column == mChangeCol) {
-        //        //txt = ChangeText [(int)line.Type];
-
-        //    } else if (column == mOrigNoCol) {
-        //        txt = (line.OrigNo > 0) ? line.OrigNo.ToString("0000") : "";
-        //        if (line.OrigDel && line.OrigNo > 0) {
-        //            backColor = BackgroundColor[1];
-        //        }
-
-        //    } else if (column == mOrigLineCol) {
-        //        txt = (line.OrigNo > 0) ? line.OrigLine : "";
-        //        if (line.OrigDel && line.OrigNo > 0) {
-        //            backColor = BackgroundColor[1];
-        //        }
-
-        //    } else if (column == mCurrNoCol) {
-        //        txt = (line.CurrNo > 0) ? line.CurrNo.ToString("0000") : "";
-        //        if (line.CurrAdd && line.CurrNo > 0) {
-        //            backColor = BackgroundColor[2];
-        //        }
-
-        //    } else if (column == mCurrLineCol) {
-        //        txt = (line.CurrNo > 0) ? line.CurrLine : "";
-        //        if (line.CurrAdd && line.CurrNo > 0) {
-        //            backColor = BackgroundColor[2];
-        //        }
-        //    }
-
-        //    render.BackgroundGdk = backColor;
-        //    render.Text = txt;
-        //}
-
-        //private ListStore GetModel(IList<DiffDisplayLine> diffs) {
-        //    var model = new ListStore(typeof(DiffDisplayLine));
-
-        //    foreach (var d in diffs) {
-        //        model.AppendValues(d);
-        //    }
-
-        //    return model;
-        //}
     }
 
 }
