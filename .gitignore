@@ -1,0 +1,14 @@
+# .gitignore
+# nothing in object folders
+obj/
+# nothing in binary folders
+bin/
+# no user preference files
+*.userprefs
+# nothing from test-results folders
+test-results/
+# no zip files stored in original folders
+*/original/*.zip
+# nothing from /OutFiles folders
+OutFiles/
+# trailing comment so I don't need to worry about new lines at end of file
