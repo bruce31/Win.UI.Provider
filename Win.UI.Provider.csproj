@@ -2,6 +2,9 @@
 
   <PropertyGroup>
     <TargetFramework>net4.6.1</TargetFramework>
+    <Version>1.0.1</Version>
+    <PackageReleaseNotes>1.0.1  Fix  Prev/Next</PackageReleaseNotes>
+    <Description>Win UI Provider for BaseApplication Framework</Description>
   </PropertyGroup>
 
   <ItemGroup>
@@ -12,39 +15,6 @@
   <ItemGroup>
     <Reference Include="System.Windows" />
     <Reference Include="System.Windows.Forms" />
-  </ItemGroup>
-
-  <ItemGroup>
-    <Compile Update="Dialogs\AssemblyDialog.cs">
-      <SubType>Form</SubType>
-    </Compile>
-    <Compile Update="Dialogs\BaseInputDialog.cs">
-      <SubType>Form</SubType>
-    </Compile>
-    <Compile Update="Dialogs\DisplayDifferenceDialog.cs">
-      <SubType>Form</SubType>
-    </Compile>
-    <Compile Update="Dialogs\DisplayListDialog.cs">
-      <SubType>Form</SubType>
-    </Compile>
-    <Compile Update="Dialogs\DisplayRtfTextDialog.cs">
-      <SubType>Form</SubType>
-    </Compile>
-    <Compile Update="Dialogs\DisplayTableDialog.cs">
-      <SubType>Form</SubType>
-    </Compile>
-    <Compile Update="Dialogs\InputComboDialog.cs">
-      <SubType>Form</SubType>
-    </Compile>
-    <Compile Update="Dialogs\InputTextDialog.cs">
-      <SubType>Form</SubType>
-    </Compile>
-    <Compile Update="Dialogs\ProgressDialog.cs">
-      <SubType>Form</SubType>
-    </Compile>
-    <Compile Update="Dialogs\TextFileEditorDialog.cs">
-      <SubType>Form</SubType>
-    </Compile>
   </ItemGroup>
 
 </Project>
